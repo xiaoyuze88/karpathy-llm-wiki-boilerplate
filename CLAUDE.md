@@ -49,9 +49,9 @@ summary: "一句话摘要"
 > **强制规则：收到操作指令后，必须先读取对应 skill 文件的完整内容，再开始执行。不得跳过此步骤。**
 
 ### Ingest（摄入）
-**触发词**："Ingest raw/..."、"摄入"、"把这个加入知识库"、"处理这篇文章"
+**触发词**："Ingest raw/..."、"摄入"、"把这个加入知识库"、"存到知识库"、"记录到知识库"、"加到知识库"、"存进知识库"、"放入知识库"、"更新知识库"、"帮我存一下"、"处理这篇文章"，或用户直接发来文件/文本内容并提到知识库
 **Skill 文件**：`.claude/skills/ingest-wiki.md`
-**说明**：读取 raw/ 来源文件，提取要点，整合进 Wiki，更新 index / concepts / entities / log / VAULT-INDEX，Git 提交。
+**说明**：支持两种方式触发：用户指定 raw/ 路径，或直接发来内容由 LLM 自动归档到 raw/。提取要点，整合进 Wiki，更新 index / concepts / entities / log / VAULT-INDEX，Git 提交。
 
 ### Query（查询）
 **触发词**："根据 wiki"、"查询 wiki"、"知识库里有没有"、"wiki 里怎么说"，以及涉及已收录主题的实质性提问
@@ -66,7 +66,7 @@ summary: "一句话摘要"
 ## 约定
 
 1. **严格的层级边界**
-   - `raw/` 只由人类写入，LLM 只读
+   - `raw/` 存放原始来源：人类手动写入，或由 LLM 在 Ingest 时代为归档，LLM 不主动修改已有内容
    - `wiki/` 只由 LLM 写入和维护
 2. **每次操作都追加到 wiki/log.md**
 3. **创建新页面后必须更新 wiki/index.md**
