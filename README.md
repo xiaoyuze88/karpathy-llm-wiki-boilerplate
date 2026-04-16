@@ -120,14 +120,14 @@ knowledge-vault/
 
 ## Quick Start
 
-### 1. Clone and Initialize
+### 1. Create Your Own Repository
+
+Click **「Use this template」→「Create a new repository」** in the top-right corner. GitHub will create a brand new independent repository for you (not a fork, no upstream association).
+
+Then clone it locally:
 
 ```bash
-git clone <your-fork> ~/knowledge-vault
-cd ~/knowledge-vault
-
-# Change the remote to your own repository
-git remote set-url origin git@github.com:<your-username>/<your-repo>.git
+git clone git@github.com:<your-username>/<your-repo>.git ~/knowledge-vault
 ```
 
 ### 2. Configure Your Agent

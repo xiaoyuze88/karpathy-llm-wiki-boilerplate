@@ -120,14 +120,14 @@ knowledge-vault/
 
 ## 快速上手
 
-### 1. Clone 并初始化
+### 1. 创建你自己的仓库
+
+点击页面右上角的 **「Use this template」→「Create a new repository」**，GitHub 会为你创建一个全新的独立仓库（非 fork，无上游关联）。
+
+然后 clone 到本地：
 
 ```bash
-git clone <your-fork> ~/knowledge-vault
-cd ~/knowledge-vault
-
-# 修改远程地址为你自己的仓库
-git remote set-url origin git@github.com:<你的用户名>/<你的仓库名>.git
+git clone git@github.com:<你的用户名>/<你的仓库名>.git ~/knowledge-vault
 ```
 
 ### 2. 配置你的 Agent
