@@ -1,6 +1,6 @@
 ---
 name: ingest-wiki
-description: 当用户说 "Ingest raw/..."、"摄入"、"处理这篇文章"、"把这个加入知识库"、"存到知识库"、"记录到知识库"、"加到知识库"、"存进知识库"、"放入知识库"、"更新知识库"、"帮我存一下"、"ingest" 等，或直接把文件/文本内容发给模型并提到知识库时，使用此 skill。包含：原始文件归档到 raw/、摘要提取、概念/实体页更新、index/log/VAULT-INDEX 维护、Git 提交全流程。
+description: 当用户说 "Ingest raw/..."、"摄入"、"处理这篇文章"、"把这个加入知识库"、"存到知识库"、"记录到知识库"、"加到知识库"、"存进知识库"、"放入知识库"、"更新知识库"、"帮我存一下"、"ingest" 等，或直接把文件/文本内容发给模型并提到知识库时，使用此 skill。包含：原始文件归档到 raw/、摘要提取、概念/实体/comparisons 页更新、index/log/VAULT-INDEX 维护、Git 提交全流程。
 ---
 
 # ingest-wiki
@@ -38,6 +38,7 @@ description: 当用户说 "Ingest raw/..."、"摄入"、"处理这篇文章"、"
    - 涉及哪些实体（人物/公司/产品，需要创建/更新 `wiki/entities/` 页面）？
    - 与已有 Wiki 内容有哪些关联或矛盾？
    - 与 `wiki/hot.md` 中的当前焦点是否相关？
+   - **comparisons 判断**：新来源是否与已有某个概念/工具存在 **≥3 个可对比维度**的竞争或替代关系（如两种框架、两种方法论）？若是，在步骤 5a 创建 `wiki/comparisons/` 页面而非将对比内容塞入 concepts。
 
 3. **创建 `wiki/sources/summary-{slug}.md`**
    ```yaml
@@ -57,10 +58,17 @@ description: 当用户说 "Ingest raw/..."、"摄入"、"处理这篇文章"、"
    - Sources 节增加条目，更新计数
    - 如有新概念，在 Concepts 节增加条目，更新计数
    - 如有新实体，在 Entities 节增加条目，更新计数
+   - 如有新比较页，在 Comparisons 节增加条目，更新计数
 
 5. **更新相关概念页（`wiki/concepts/*.md`）**
    - 不存在则创建（含完整 frontmatter）
    - 已存在则在末尾追加新来源的视角，更新 `modified` 日期
+
+5a. **创建比较页（如步骤 2 判断需要，`wiki/comparisons/*.md`）**
+   - 文件命名：`{slug-a}-vs-{slug-b}.md`
+   - 内容结构：对比维度表格 + 各维度详述 + 适用场景 + 结论建议
+   - frontmatter tags 加 `#comparison`
+   - 同时在对应的 concepts 页末尾添加指向此比较页的链接
 
 6. **更新相关实体页（`wiki/entities/*.md`）**
    - 同步骤 5
@@ -77,6 +85,7 @@ description: 当用户说 "Ingest raw/..."、"摄入"、"处理这篇文章"、"
    - 更新概念: {列表，无则写"无"}
    - 新增实体: {列表，无则写"无"}
    - 更新实体: {列表，无则写"无"}
+   - 新增比较页: {列表，无则写"无"}
    - 矛盾: {描述，无则写"无"}
    ```
 
@@ -93,7 +102,6 @@ description: 当用户说 "Ingest raw/..."、"摄入"、"处理这篇文章"、"
 
 11. **Git 同步**
     ```bash
-    # 如果知识库不在 ~/knowledge-vault，请将下面路径替换为实际路径
     cd ~/knowledge-vault
     git add .
     git commit -m "ingest: {文件名}"

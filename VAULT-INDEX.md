@@ -20,7 +20,8 @@
 
 | 日期 | 操作 | 内容 |
 |------|------|------|
-| 2026-04-14 | ingest | LLM Wiki 入门指南（test-welcome.md） |
+| 2026-04-16 | lint | 健康检查：1 结构问题、1 孤立页 已修；0 矛盾、0 过时声明 |
+| 2026-04-16 | ingest | Karpathy LLM Wiki（Karpathy_LLM_Wiki.md） |
 | 2026-04-14 | init | boilerplate 初始化 |
 
 ---
@@ -32,7 +33,7 @@
 ├── CLAUDE.md
 ├── VAULT-INDEX.md
 ├── raw/
-│   └── articles/         # 1 个示例文件
+│   └── articles/         # 1 个文件
 └── wiki/
     ├── index.md
     ├── log.md
@@ -48,11 +49,12 @@
 
 ## 🌡️ 当前焦点
 
-*（由 LLM 根据最近 ingest 内容自动更新）*
+LLM Wiki 范式 — 编译时知识积累 vs RAG 查询时推导；规模临界点（100-200 篇）；三大规模化缺陷
 
 ## ❓ 开放问题
 
-*（有待补充来源解答的问题）*
+- 本知识库规模扩展时，何时引入 obsidian-wikilink-types 语义链接？
+- 知识压缩（Compaction）的具体触发条件和操作规程？
 
 ---
 
