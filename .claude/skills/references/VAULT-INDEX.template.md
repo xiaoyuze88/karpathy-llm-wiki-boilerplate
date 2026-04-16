@@ -8,9 +8,9 @@
 
 | 指标 | 数量 |
 |------|------|
-| Sources | 1 |
-| Concepts | 3 |
-| Entities | 1 |
+| Sources | 0 |
+| Concepts | 0 |
+| Entities | 0 |
 | Comparisons | 0 |
 | Syntheses | 0 |
 
@@ -20,8 +20,7 @@
 
 | 日期 | 操作 | 内容 |
 |------|------|------|
-| 2026-04-14 | ingest | LLM Wiki 入门指南（test-welcome.md） |
-| 2026-04-14 | init | boilerplate 初始化 |
+| YYYY-MM-DD | init | Wiki 初始化 |
 
 ---
 
@@ -32,14 +31,14 @@
 ├── CLAUDE.md
 ├── VAULT-INDEX.md
 ├── raw/
-│   └── articles/         # 1 个示例文件
+│   └── articles/
 └── wiki/
     ├── index.md
     ├── log.md
     ├── hot.md
-    ├── sources/           # 1 个摘要页
-    ├── concepts/          # 3 个概念页
-    ├── entities/          # 1 个实体页
+    ├── sources/
+    ├── concepts/
+    ├── entities/
     ├── comparisons/
     └── syntheses/
 ```

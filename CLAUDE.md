@@ -23,7 +23,6 @@
     ├── index.md         # 主目录（查询从这里开始）
     ├── log.md           # 活动时间线（只追加）
     ├── hot.md           # 热缓存（会话上下文）
-    ├── overview.md       # 高级概述
     ├── sources/         # 源摘要页
     ├── entities/        # 人物/公司/产品页
     ├── concepts/        # 概念解释页

@@ -65,8 +65,16 @@ description: 当用户说 "Ingest raw/..."、"摄入 raw/..."、"处理这篇文
    - Sources 统计 +1
    - 最近活动列表追加本次 ingest 记录
 
-10. **Git 同步**
+10. **更新 `wiki/hot.md`**
+    - 在"最近活动"区块追加本次摘要：
+      ```
+      - {日期} ingest | {来源文件名}：{1-2句关键要点}，新增页面：{列表}
+      ```
+    - 如 hot.md 超过 500 字，压缩最早的活动记录（保留结构，删减细节）
+
+11. **Git 同步**
     ```bash
+    # 如果知识库不在 ~/knowledge-vault，请将下面路径替换为实际路径
     cd ~/knowledge-vault
     git add .
     git commit -m "ingest: {文件名}"
