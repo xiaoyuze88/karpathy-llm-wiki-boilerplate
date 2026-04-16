@@ -1,9 +1,9 @@
 # Wiki Activity Log
 
-> 只追加，不修改。每条格式：`## [YYYY-MM-DD] 操作类型 | 简短描述`
+> Append-only. Each entry format: `## [YYYY-MM-DD] operation type | short description`
 
 ---
 
-## [YYYY-MM-DD] init | Wiki 初始化
-- 创建初始结构
-- 准备首次 ingest
+## [YYYY-MM-DD] init | Wiki initialized
+- Created initial structure
+- Ready for first ingest

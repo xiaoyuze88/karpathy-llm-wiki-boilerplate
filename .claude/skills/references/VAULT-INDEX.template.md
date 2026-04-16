@@ -1,13 +1,13 @@
-# VAULT-INDEX — 实时仪表板
+# VAULT-INDEX — Live Dashboard
 
-> 本文件由 LLM 自动维护，每次 ingest / lint 后更新。
+> This file is auto-maintained by the LLM and updated after every ingest / lint.
 
 ---
 
-## 📊 统计概览
+## 📊 Stats
 
-| 指标 | 数量 |
-|------|------|
+| Metric | Count |
+|--------|-------|
 | Sources | 0 |
 | Concepts | 0 |
 | Entities | 0 |
@@ -16,15 +16,15 @@
 
 ---
 
-## 🔄 最近活动
+## 🔄 Recent Activity
 
-| 日期 | 操作 | 内容 |
-|------|------|------|
-| YYYY-MM-DD | init | Wiki 初始化 |
+| Date | Operation | Details |
+|------|-----------|---------|
+| YYYY-MM-DD | init | Wiki initialized |
 
 ---
 
-## 📁 目录结构
+## 📁 Directory Structure
 
 ```
 ~/knowledge-vault/
@@ -45,14 +45,14 @@
 
 ---
 
-## 🌡️ 当前焦点
+## 🌡️ Current Focus
 
-*（由 LLM 根据最近 ingest 内容自动更新）*
+*(Auto-updated by the LLM based on recent ingest content)*
 
-## ❓ 开放问题
+## ❓ Open Questions
 
-*（有待补充来源解答的问题）*
+*(Questions awaiting additional sources or queries)*
 
 ---
 
-*本文件由 AI 自动更新，每次 ingest/lint 后自动刷新统计信息*
+*This file is auto-updated by the LLM after every ingest/lint*

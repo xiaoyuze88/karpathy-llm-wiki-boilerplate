@@ -1,111 +1,111 @@
 ---
 name: lint-wiki
-description: 当用户说 "Lint the wiki"、"lint wiki"、"健康检查"、"检查知识库"、"wiki 有没有问题"、"清理一下 wiki" 时使用此 skill。负责扫描整个 wiki/ 目录，检测矛盾、孤立页面、缺失概念、过时声明、结构问题，生成诊断报告并推荐下一步行动。
+description: Use this skill when the user says "Lint the wiki", "lint wiki", "health check", "check the wiki for issues", "are there issues with the wiki", or "audit the wiki". Scans the entire wiki/ directory, detects contradictions, orphan pages, missing concepts, outdated statements, and structural issues, generates a diagnostic report with recommended next steps.
 ---
 
 # lint-wiki
 
-扫描 `wiki/` 目录，检测质量问题，输出诊断报告。
+Scan the `wiki/` directory, detect quality issues, output a diagnostic report.
 
-## 执行步骤
+## Steps
 
-1. **扫描所有 wiki/ 文件**
-   - 读取 `wiki/index.md` 获取全局视图和页面列表
-   - 逐一读取所有子目录下的 .md 文件
+1. **Scan all wiki/ files**
+   - Read `wiki/index.md` for the global view and page list
+   - Read all .md files in each subdirectory one by one
 
-2. **检测矛盾**
-   - 找出不同页面对同一概念的相互矛盾描述
-   - 标记可能过时的具体数据/版本号（创建时间距今 >6 个月）
+2. **Detect contradictions**
+   - Find mutually contradictory descriptions of the same concept across different pages
+   - Flag potentially outdated specific data/version numbers (created more than 6 months ago)
 
-3. **找出孤立页面**
-   - 没有被任何其他 wiki/ 页面以 `[[链接]]` 形式引用的页面
+3. **Find orphan pages**
+   - Pages not referenced by any other wiki/ page via `[[link]]` syntax
 
-4. **找出缺失概念**
-   - 在 ≥3 个页面中被提及但没有专属 `wiki/concepts/` 页面的词汇/概念
+4. **Find missing concepts**
+   - Terms/concepts mentioned in ≥3 pages but without a dedicated `wiki/concepts/` page
 
-5. **检查结构完整性**
-   - `wiki/index.md` 中的计数是否与实际文件数一致
-   - 各页面 frontmatter 是否完整（title/created/modified/tags/summary 五个必填字段）
-   - `wiki/log.md` 中的条目格式是否统一（应为 `## [YYYY-MM-DD] 操作类型 | 描述`）
+5. **Check structural integrity**
+   - Do counts in `wiki/index.md` match actual file counts?
+   - Are all page frontmatters complete (title/created/modified/tags/summary — all five required fields)?
+   - Are entries in `wiki/log.md` consistently formatted (should be `## [YYYY-MM-DD] operation type | description`)?
 
-6. **建议新来源**
-   - 根据现有 Wiki 的主题范围和空白区域，推荐 5-10 个值得补充的来源方向
-   - 每条建议说明：主题 + 为什么有价值 + 可能的搜索关键词
+6. **Suggest new sources**
+   - Based on the existing Wiki's topic scope and gaps, recommend 5–10 sources worth adding
+   - Each suggestion includes: topic + why it's valuable + possible search keywords
 
-7. **生成报告并制定修复方案**（输出到对话）
+7. **Generate report and fix plan** (output to conversation)
 
-   报告格式：
+   Report format:
    ```
-   ## Lint 报告 [{日期}]
+   ## Lint Report [{date}]
 
-   ### 矛盾 ({n} 处)
-   - 页面A vs 页面B：{描述矛盾内容}
-     → 建议：保留哪个版本，或如何调和
+   ### Contradictions ({n} found)
+   - Page A vs Page B: {describe the contradiction}
+     → Suggestion: which version to keep, or how to reconcile
 
-   ### 孤立页面 ({n} 个)
-   - [[页面路径]] — {原因}
-     → 建议：添加到哪个页面的引用中，或删除
+   ### Orphan Pages ({n} found)
+   - [[page path]] — {reason}
+     → Suggestion: add a reference from which page, or delete
 
-   ### 缺失概念 ({n} 个)
-   - "{概念词}" — 出现在：{页面列表}
-     → 建议：新建 wiki/concepts/{slug}.md
+   ### Missing Concepts ({n} found)
+   - "{concept}" — appears in: {page list}
+     → Suggestion: create wiki/concepts/{slug}.md
 
-   ### 结构问题 ({n} 处)
-   - {具体问题描述}
-     → 建议：{修复方法}
+   ### Structural Issues ({n} found)
+   - {specific issue description}
+     → Suggestion: {how to fix}
 
-   ### 过时声明 ({n} 处)
-   - 页面：{路径}，内容：{原文}，创建时间：{日期}
-     → 建议：更新或标注过时
+   ### Outdated Statements ({n} found)
+   - Page: {path}, content: {original text}, created: {date}
+     → Suggestion: update or mark as outdated
 
-   ### 建议新来源 ({n} 个)
-   - {主题}：{理由} [搜索词：{关键词}]
-   ```
-
-   报告生成后，按优先级列出修复计划：
-   ```
-   ## 修复计划
-
-   P0 [立即修] {问题} → {具体操作}
-   P1 [建议修] {问题} → {具体操作}
-   P2 [可选修] {问题} → {具体操作}
+   ### Suggested New Sources ({n})
+   - {topic}: {rationale} [search terms: {keywords}]
    ```
 
-   **输出修复计划后等待用户确认，用户同意后按优先级逐项执行修复（直接编辑 wiki 页面）。**
-
-8. **执行修复（用户确认后）**
-   - 按 P0 → P1 → P2 顺序逐项修复
-   - 每修复一项向用户简报："已修复：{问题}"
-   - 全部完成后进入下一步
-
-9. **追加到 `wiki/log.md`**
+   After generating the report, list fixes by priority:
    ```
-   ## [{日期}] lint | 健康检查
-   - 矛盾: {n} 处（已修 {m} 处）
-   - 孤立页面: {n} 个（已修 {m} 个）
-   - 缺失概念: {n} 个（已修 {m} 个）
-   - 结构问题: {n} 处（已修 {m} 处）
-   - 过时声明: {n} 处（已修 {m} 处）
+   ## Fix Plan
+
+   P0 [Fix now]      {issue} → {specific action}
+   P1 [Recommended]  {issue} → {specific action}
+   P2 [Optional]     {issue} → {specific action}
    ```
 
-10. **更新 `VAULT-INDEX.md`**
-    - 最近活动追加本次 lint 记录
+   **After outputting the fix plan, wait for user confirmation. Once confirmed, execute fixes in priority order (edit wiki pages directly).**
 
-11. **更新 `wiki/hot.md`**
-    - 在"最近活动"区块追加：
+8. **Execute fixes (after user confirmation)**
+   - Fix items in P0 → P1 → P2 order
+   - Brief the user after each fix: "Fixed: {issue}"
+   - Proceed to next step when all done
+
+9. **Append to `wiki/log.md`**
+   ```
+   ## [{date}] lint | health check
+   - Contradictions: {n} found ({m} fixed)
+   - Orphan pages: {n} found ({m} fixed)
+   - Missing concepts: {n} found ({m} fixed)
+   - Structural issues: {n} found ({m} fixed)
+   - Outdated statements: {n} found ({m} fixed)
+   ```
+
+10. **Update `VAULT-INDEX.md`**
+    - Append this lint to recent activity
+
+11. **Update `wiki/hot.md`**
+    - Append to "Recent Activity":
       ```
-      - {日期} lint | 发现 {n} 个问题，已修复 {m} 个，待处理：{未修问题列表}
+      - {date} lint | found {n} issues, fixed {m}, pending: {unfixed issue list}
       ```
-    - 如 hot.md 超过 500 字，压缩最早的活动记录
+    - If hot.md exceeds 500 words, compress the oldest activity records
 
-12. **Git 同步**
+12. **Git sync**
     ```bash
     cd ~/knowledge-vault
     git add .
-    git commit -m "lint: 健康检查 {日期}"
+    git commit -m "lint: health check {date}"
     git push
     ```
 
-## 完成后输出
+## Output
 
-Lint 报告 + 修复计划（等待用户确认）→ 执行修复 → 汇报修复结果 + Git push 状态。
+Lint report + fix plan (wait for user confirmation) → execute fixes → report fix results + Git push status.

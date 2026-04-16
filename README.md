@@ -1,309 +1,309 @@
 # karpathy-llm-wiki-boilerplate
 
-> 基于 [Andrej Karpathy LLM Wiki 方案](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) 的个人知识库脚手架。
-> Clone 下来，简单配置，即可拥有一个由 LLM 持续维护的个人 Wiki。
+> A personal knowledge vault boilerplate based on [Andrej Karpathy's LLM Wiki approach](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f).
+> Clone it, configure it, and you'll have a personal Wiki continuously maintained by an LLM.
 
 ---
 
-## 核心理念
+## Core Philosophy
 
-传统 RAG 每次提问都从零推导，没有知识积累。这套方案不同：
+Traditional RAG derives everything from scratch on every query, with no knowledge accumulation. This approach is different:
 
-**每摄入一份来源，LLM 就把知识编译进 Wiki**——更新摘要页、概念页、实体页、交叉引用。知识持续复利增长，而不是每次从零开始。
+**Every time a source is ingested, the LLM compiles knowledge into the Wiki** — updating summary pages, concept pages, entity pages, and cross-references. Knowledge compounds continuously rather than starting from zero each time.
 
-| | 传统 RAG | LLM Wiki |
+| | Traditional RAG | LLM Wiki |
 |---|---|---|
-| 知识处理 | 查询时实时推导 | 摄入时一次性编译 |
-| 知识积累 | 无，每次重置 | 持续复利增长 |
-| 维护者 | 无 | LLM（永不疲倦） |
-| 可读性 | 向量，不可读 | Markdown，人可直接读 |
+| Knowledge Processing | Real-time derivation at query time | One-time compilation at ingest time |
+| Knowledge Accumulation | None, resets each time | Continuous compounding growth |
+| Maintainer | None | LLM (never tires) |
+| Readability | Vectors, not human-readable | Markdown, directly readable by humans |
 
-**分工**：人负责策展来源、提问、决策；LLM 负责摘要、归档、交叉引用、一致性维护。
+**Division of Labor**: Humans curate sources, ask questions, and make decisions; LLMs handle summarization, archiving, cross-referencing, and consistency maintenance.
 
 ---
 
-## 工作流实现原理
+## How the Workflow Works
 
-本项目的工作流**完全依靠大模型 + Prompt 约束实现**，无需任何代码、数据库或外部服务——四个 Markdown 文件定义操作规范，LLM 读取后按清单执行，Git 负责持久化。
+This project's workflow is **entirely driven by LLM + Prompt constraints** — no code, databases, or external services needed. Four Markdown files define the operational rules, the LLM reads them and executes accordingly, and Git handles persistence.
 
 ```mermaid
 sequenceDiagram
-    actor 你
+    actor You
     participant LLM
     participant Wiki as Wiki (Markdown + Git)
 
     rect rgb(235, 245, 255)
-        Note over 你,Wiki: Ingest — 摄入
-        你->>LLM: 投入原始来源 raw/articles/foo.md
-        Note over LLM: 读 ingest-wiki.md<br/>提取 3-5 个关键要点
-        LLM->>Wiki: 生成摘要页 wiki/sources/
-        LLM->>Wiki: 创建/更新概念页 wiki/concepts/
-        LLM->>Wiki: 创建/更新实体页 wiki/entities/
-        LLM->>Wiki: 如需要，创建比较页 wiki/comparisons/
-        LLM->>Wiki: 更新索引/日志 wiki/index.md
+        Note over You,Wiki: Ingest
+        You->>LLM: Feed raw source raw/articles/foo.md
+        Note over LLM: Read ingest-wiki.md<br/>Extract 3-5 key takeaways
+        LLM->>Wiki: Generate summary page wiki/sources/
+        LLM->>Wiki: Create/update concept page wiki/concepts/
+        LLM->>Wiki: Create/update entity page wiki/entities/
+        LLM->>Wiki: If needed, create comparison page wiki/comparisons/
+        LLM->>Wiki: Update index/log wiki/index.md
         LLM->>Wiki: git commit & push
     end
 
     rect rgb(240, 255, 240)
-        Note over 你,Wiki: Query — 查询
-        你->>LLM: 根据 wiki，XX 是什么？
-        Note over LLM: 读 query-wiki.md
-        Wiki-->>LLM: 读 wiki/index.md + 相关页面
-        Note over LLM: 综合多页内容
-        LLM->>你: 带来源标注的答案
-        Note over LLM: 达到归档标准时
-        LLM->>Wiki: 存入 wiki/syntheses/ + git push
+        Note over You,Wiki: Query
+        You->>LLM: According to wiki, what is XX?
+        Note over LLM: Read query-wiki.md
+        Wiki-->>LLM: Read wiki/index.md + related pages
+        Note over LLM: Synthesize across pages
+        LLM->>You: Answer with source citations
+        Note over LLM: When archiving threshold met
+        LLM->>Wiki: Store in wiki/syntheses/ + git push
     end
 
     rect rgb(230, 250, 245)
-        Note over 你,Wiki: Synthesize — 综合
-        你->>LLM: 综合一下 wiki 里关于 X 的内容
-        Note over LLM: 读 synthesize-wiki.md<br/>扫描所有相关页面
-        Wiki-->>LLM: 读取 sources/concepts/entities/comparisons
-        Note over LLM: 识别多源共识 vs 单源观点<br/>标注 Wiki 空白
-        LLM->>Wiki: 直接写入 wiki/syntheses/ + git push
-        LLM->>你: 报告全文 + 空白提示
+        Note over You,Wiki: Synthesize
+        You->>LLM: Synthesize everything in wiki about X
+        Note over LLM: Read synthesize-wiki.md<br/>Scan all related pages
+        Wiki-->>LLM: Read sources/concepts/entities/comparisons
+        Note over LLM: Identify multi-source consensus vs single-source views<br/>Flag Wiki gaps
+        LLM->>Wiki: Write directly to wiki/syntheses/ + git push
+        LLM->>You: Full report + gap alerts
     end
 
     rect rgb(255, 248, 235)
-        Note over 你,Wiki: Lint — 健康检查
-        你->>LLM: Lint the wiki
-        Note over LLM: 读 lint-wiki.md<br/>扫描矛盾/孤立页/缺失概念
-        LLM->>你: 诊断报告 + 修复方案
-        你->>LLM: 确认修复
-        LLM->>Wiki: 执行修复 + git commit & push
+        Note over You,Wiki: Lint — Health Check
+        You->>LLM: Lint the wiki
+        Note over LLM: Read lint-wiki.md<br/>Scan for contradictions/orphan pages/missing concepts
+        LLM->>You: Diagnostic report + fix proposals
+        You->>LLM: Confirm fixes
+        LLM->>Wiki: Apply fixes + git commit & push
     end
 
     rect rgb(248, 240, 255)
-        Note over 你,Wiki: Obsidian — 可视化阅读
-        Wiki-->>你: 直接打开 wiki/ 文件夹浏览全部内容
+        Note over You,Wiki: Obsidian — Visual Reading
+        Wiki-->>You: Open wiki/ folder directly to browse all content
     end
 ```
 
-整个知识库是一份 Markdown 仓库：**人负责投料，LLM 负责编译和维护，Obsidian 负责可视化阅读**，三者分工明确、互不干扰。
+The entire knowledge base is a Markdown repository: **Humans feed sources, the LLM compiles and maintains, and Obsidian provides visual reading** — clear division of labor with no interference.
 
 ---
 
-## 目录结构
+## Directory Structure
 
 ```
 knowledge-vault/
-├── README.md              # 本文件
-├── CLAUDE.md              # Schema：工作流规范，LLM 操作前必读
-├── VAULT-INDEX.md         # 实时仪表板（LLM 自动维护）
-├── raw/                   # 原始来源（只读，人类写入）
-│   ├── articles/          # 网页剪藏文章
+├── README.md              # This file
+├── CLAUDE.md              # Schema: workflow spec, LLM must read before operating
+├── VAULT-INDEX.md         # Live dashboard (auto-maintained by LLM)
+├── raw/                   # Raw sources (read-only, human-written)
+│   ├── articles/          # Web clipped articles
 │   ├── papers/
 │   ├── repos/
 │   ├── transcripts/
 │   ├── data/
 │   └── assets/
-├── wiki/                  # LLM 维护的知识库（LLM 写入）
-│   ├── index.md           # 主目录，查询从这里开始
-│   ├── log.md             # 操作时间线（只追加）
-│   ├── hot.md             # 当前会话焦点缓存
-│   ├── sources/           # 每份来源的摘要页
-│   ├── concepts/          # 概念解释页
-│   ├── entities/          # 人物 / 公司 / 产品页
-│   ├── comparisons/       # 多维度比较分析页
-│   └── syntheses/         # 跨来源综合报告页
+├── wiki/                  # LLM-maintained knowledge base (LLM writes)
+│   ├── index.md           # Main directory, start queries here
+│   ├── log.md             # Operation timeline (append-only)
+│   ├── hot.md             # Current session focus cache
+│   ├── sources/           # Summary page per source
+│   ├── concepts/          # Concept explanation pages
+│   ├── entities/          # People / Company / Product pages
+│   ├── comparisons/       # Multi-dimensional comparison analysis pages
+│   └── syntheses/         # Cross-source synthesis report pages
 └── .claude/
-    └── skills/            # 四种核心操作的执行手册
+    └── skills/            # Execution manuals for four core operations
         ├── ingest-wiki.md
         ├── query-wiki.md
         ├── synthesize-wiki.md
         ├── lint-wiki.md
-        └── references/    # 各核心文件的空白模板备份
+        └── references/    # Blank template backups for core files
 ```
 
 ---
 
-## 快速上手
+## Quick Start
 
-### 1. Clone 并初始化
+### 1. Clone and Initialize
 
 ```bash
 git clone <your-fork> ~/knowledge-vault
 cd ~/knowledge-vault
 
-# 修改远程地址为你自己的仓库
-git remote set-url origin git@github.com:<你的用户名>/<你的仓库名>.git
+# Change the remote to your own repository
+git remote set-url origin git@github.com:<your-username>/<your-repo>.git
 ```
 
-### 2. 配置你的 Agent
+### 2. Configure Your Agent
 
-这是让 Agent 感知知识库的**唯一关键路径**，不做这一步，Agent 不知道知识库的存在，也不会触发任何工作流。
+This is the **only critical step** to make your Agent aware of the knowledge base. Without this, the Agent won't know the knowledge base exists and won't trigger any workflows.
 
-原理很简单：Agent 每次会话启动时读取全局系统 Prompt 建立初始上下文；当你说出触发词时，它会去读项目里的 `CLAUDE.md`，从而了解完整工作流并执行对应操作。
+The principle is simple: the Agent reads the global system prompt at the start of each session to establish initial context; when you say a trigger phrase, it reads the project's `CLAUDE.md`, learns the full workflow, and executes the corresponding operation.
 
-将以下提示词写入你的 Agent 全局系统 Prompt：
+Add the following prompt to your Agent's global system prompt:
 
-> 路径 `~/knowledge-vault/` 请替换为你实际的 clone 路径。如需使用其他路径，还需同步修改 `.claude/skills/` 下四个 skill 文件中的 `cd ~/knowledge-vault`。
+> Replace the path `~/knowledge-vault/` with your actual clone path. If using a different path, also update the `cd ~/knowledge-vault` in the four skill files under `.claude/skills/`.
 
 ```markdown
-## 知识库工作流
+## Knowledge Base Workflow
 
-我有一个由 LLM 维护的个人知识库，位于 `~/knowledge-vault/`。
-知识库通过四种操作持续积累知识：Ingest（摄入来源）、Query（检索问答）、Synthesize（综合报告）、Lint（健康检查）。
+I have a personal knowledge base maintained by an LLM, located at `~/knowledge-vault/`.
+The knowledge base accumulates knowledge through four operations: Ingest (ingest sources), Query (search & Q&A), Synthesize (synthesis reports), Lint (health checks).
 
-**核心规则：涉及以下任意触发词时，必须先完整读取 `~/knowledge-vault/CLAUDE.md`，再执行操作。**
+**Core Rule: When any of the following trigger phrases are involved, you MUST first read `~/knowledge-vault/CLAUDE.md` in full before executing any operation.**
 
-触发词对照：
-- Ingest（摄入）："存入知识库"、"加到知识库"、"存进知识库"、"放入知识库"、"更新知识库"、"帮我存一下"、"摄入"、"ingest"，或用户直接发来文件/内容并提到知识库
-- Query（查询）："根据知识库"、"知识库里有没有"、"知识库怎么说"、"根据 wiki"、"查一下知识库"，以及涉及已收录主题的实质性提问
-- Synthesize（综合）："综合一下"、"帮我写一篇关于 X 的报告"、"synthesize"、"synthesis"、"把 wiki 里关于 X 的内容整合一下"、"生成综合报告"
-- Lint（健检）："检查知识库"、"知识库有没有问题"、"清理知识库"、"lint"、"健康检查"
+Trigger phrases:
+- Ingest: "save to the knowledge base", "add to the knowledge base", "store in the knowledge base", "put this in the knowledge base", "save this to the wiki", "ingest", or when the user sends a file/content and mentions the knowledge base
+- Query: "according to the knowledge base", "is it in the knowledge base", "what does the knowledge base say", "according to the wiki", "look up X in the knowledge base", and substantive questions about topics already in the wiki
+- Synthesize: "write a synthesis on X", "help me write a report about X", "synthesize", "synthesis", "pull together everything in the wiki about X", "create a synthesis report on X"
+- Lint: "check the knowledge base for issues", "any issues with the knowledge base", "clean up the knowledge base", "lint", "health check"
 
-**Git**：每次 Ingest / Synthesize / Lint 操作完成后执行 commit & push；Query 仅在归档新内容时提交。
+**Git**: Execute commit & push after each Ingest / Synthesize / Lint operation; Query only commits when archiving new content.
 ```
 
-在 OpenClaw/WorkBuddy 中，你可以直接通过对话跟 Agent 对话，让其帮你将上述提示词添加到 SOUL.md/MEMORY.md 中。使用其他 Agent（如 Claude Code）的话，找到对应的全局系统 Prompt 入口，把提示词内容手动粘贴进去即可。
+In OpenClaw/WorkBuddy, you can simply chat with the Agent to have it add the above prompt to your SOUL.md/MEMORY.md. For other Agents (like Claude Code), find the corresponding global system prompt entry and paste the prompt content manually.
 
-**说明**：
-- `SOUL.md` 是全局配置，每个会话都会注入，适合写入
-- `MEMORY.md` 是跨会话记忆，如果你的 Agent 支持的话也可以写入
-- 两者都写入效果最稳定
+**Notes**:
+- `SOUL.md` is a global config injected into every session — ideal for this
+- `MEMORY.md` is cross-session memory — also suitable if your Agent supports it
+- Writing to both provides the most stable results
 
-### 3. 验证可用
+### 3. Verify It Works
 
-对 Agent 说：**"请从我的知识库中帮我查下 karpathy llm wiki 是什么"**，确认它能正确理解工作流。
+Say to your Agent: **"Please search my knowledge base for what karpathy llm wiki is"** and confirm it correctly understands the workflow.
 
 ---
 
-## 快速上手完成 🎉
+## Quick Start Complete 🎉
 
-接下来可以：
-- 直接 **Ingest** 你感兴趣的文章开始积累知识
-- 阅读下方「进阶用法」了解更多玩法
-- 参考「四种核心操作」了解每个命令的详细说明
+Next steps:
+- Start accumulating knowledge by **Ingesting** articles you're interested in
+- Read the "Advanced Usage" section below for more tips
+- Refer to "Four Core Operations" for detailed command descriptions
 
 ---
 
-## 四种核心操作
+## Four Core Operations
 
-### Ingest（摄入）
+### Ingest
 
-**方式 A**：把文章放入 `raw/articles/`，然后告诉 Agent：
-
-```
-Ingest raw/articles/你的文章.md
-```
-
-**方式 B**：直接把文件或文本内容发给 Agent，并说加入知识库：
+**Method A**: Place an article in `raw/articles/`, then tell the Agent:
 
 ```
-把这个存入知识库
-帮我记录到知识库
+Ingest raw/articles/your-article.md
 ```
 
-Agent 会自动判断类型归档到对应的 `raw/` 子目录，再执行后续流程。
-
-Agent 会：归档原文 → 读文件 → 提取要点 → 建摘要页 → 更新概念/实体页 → 如需要创建比较页 → 更新 index/log → Git push。
-**一次摄入通常触碰 5-15 个 Wiki 页面。**
-
-> 比较页触发条件：新来源与已有概念存在 ≥3 个可对比维度的竞争或替代关系时，自动在 `wiki/comparisons/` 创建比较分析页。
-
-### Query（查询）
+**Method B**: Send a file or text content directly to the Agent and ask to add it to the knowledge base:
 
 ```
-# 直接提问，或明确指向 Wiki：
-根据 wiki，XX 和 YY 有什么区别？
+Save this to the knowledge base
+Add this to the knowledge base
 ```
 
-Agent 会：读 index → 定位相关页 → 综合答案 → 当答案综合 >2 个来源且有价值时，询问是否归档到 `wiki/syntheses/`。
+The Agent will automatically determine the type and archive it to the appropriate `raw/` subdirectory, then proceed with the ingestion flow.
 
-### Synthesize（综合）
+The Agent will: archive the original → read the file → extract key points → create a summary page → update concept/entity pages → create a comparison page if needed → update index/log → Git push.
+**A single ingestion typically touches 5-15 Wiki pages.**
+
+> Comparison page trigger condition: When a new source has a competitive or alternative relationship with an existing concept across ≥3 comparable dimensions, a comparison analysis page is automatically created in `wiki/comparisons/`.
+
+### Query
 
 ```
-综合一下 wiki 里关于 XX 的内容
-帮我写一篇关于 XX 的报告
+# Ask directly, or explicitly reference the Wiki:
+According to wiki, what's the difference between XX and YY?
 ```
 
-与 Query 的区别：**主动产出，直接写入，无需二次确认**。
+The Agent will: read index → locate relevant pages → synthesize an answer → when the answer draws from >2 sources and has value, ask whether to archive it to `wiki/syntheses/`.
 
-Agent 会：扫描所有相关页 → 识别多源共识 vs 单源观点 → 标注 Wiki 空白 → 直接写入 `wiki/syntheses/` → Git push。
+### Synthesize
 
-### Lint（健检）
+```
+Synthesize everything in wiki about XX
+Help me write a report about XX
+```
+
+Difference from Query: **Proactive output, written directly, no confirmation needed.**
+
+The Agent will: scan all related pages → identify multi-source consensus vs single-source views → flag Wiki gaps → write directly to `wiki/syntheses/` → Git push.
+
+### Lint
 
 ```
 Lint the wiki
 ```
 
-Agent 会：扫描矛盾、孤立页、缺失概念、过时声明 → 输出诊断报告和优先级修复方案 → 等待确认 → 执行修复 → Git push。
-**建议每 20 次摄入或每月跑一次。**
+The Agent will: scan for contradictions, orphan pages, missing concepts, outdated claims → output a diagnostic report with prioritized fix proposals → wait for confirmation → apply fixes → Git push.
+**Recommended: run once every 20 ingestions or once per month.**
 
 ---
 
-## 进阶用法
+## Advanced Usage
 
-### Obsidian 可视化阅读
+### Visual Reading with Obsidian
 
-整个 `wiki/` 目录就是标准 Obsidian Vault，可以直接用图谱视图浏览双链关系。
+The entire `wiki/` directory is a standard Obsidian Vault — you can use the graph view to browse bidirectional link relationships.
 
-1. 打开 Obsidian → 「打开文件夹作为 Vault」→ 选择 `~/knowledge-vault`
+1. Open Obsidian → "Open Folder as Vault" → select `~/knowledge-vault`
 2. Settings → Files and links → Attachment folder path → `raw/assets`
-3. 推荐插件：**Obsidian Web Clipper**（浏览器扩展，一键把网页转 Markdown 后放入 `raw/articles/`）
+3. Recommended plugin: **Obsidian Web Clipper** (browser extension that converts web pages to Markdown and saves them to `raw/articles/` with one click)
 
-### 用 Web Clipper 快速摄入网页
+### Quick Web Ingest with Web Clipper
 
-1. 安装 Obsidian Web Clipper 浏览器扩展
-2. 浏览到目标网页，点击扩展一键剪藏到 `raw/articles/`
-3. 对 Agent 说 `Ingest raw/articles/{文件名}.md` 即完成摄入
+1. Install the Obsidian Web Clipper browser extension
+2. Browse to a target web page, click the extension to clip it to `raw/articles/` with one click
+3. Tell the Agent `Ingest raw/articles/{filename}.md` to complete the ingestion
 
-### 定期 Lint 保持健康
+### Periodic Lint for Health
 
-知识库会随摄入增长而积累冗余，建议：
-- **每 20 次摄入**跑一次 `Lint the wiki`
-- **每月**做一次深度清理，重点关注 P0/P1 问题
-- Lint 报告中的「建议新来源」是扩充知识库的好起点
+The knowledge base accumulates redundancy as it grows. Recommendations:
+- Run `Lint the wiki` **every 20 ingestions**
+- Do a **monthly** deep clean, focusing on P0/P1 issues
+- "Suggested new sources" in Lint reports are great starting points for expanding the knowledge base
 
-### 主动生成综合报告
+### Proactively Generate Synthesis Reports
 
-积累一定来源后，可以主动要求 Agent 产出跨来源洞见：
+After accumulating enough sources, you can proactively ask the Agent to produce cross-source insights:
 
 ```
-综合一下 wiki 里关于 XX 的内容
-帮我写一篇关于 XX 和 YY 对比的报告
+Synthesize everything in wiki about XX
+Help me write a report comparing XX and YY
 ```
 
-综合报告自动写入 `wiki/syntheses/`，是知识库从"存档"升级为"产出"的关键操作。
+Synthesis reports are automatically written to `wiki/syntheses/` — this is the key operation that elevates the knowledge base from "archive" to "output."
 
-### 规模临界点与迁移路径
+### Scale Thresholds and Migration Path
 
-本方案可靠运行的上限约为 **100–200 篇来源 / 50,000–100,000 Token**。超出后 `wiki/index.md` 无法完整装入上下文窗口，查询质量开始下降，需要引入 RAG 或混合架构。
+This approach reliably scales to about **100–200 sources / 50,000–100,000 tokens**. Beyond that, `wiki/index.md` can no longer fit entirely in the context window, query quality starts to degrade, and you'll need to introduce RAG or a hybrid architecture.
 
-关于规模化瓶颈的详细分析（与 RAG 的深度对比、三大缺陷与解决方案），参见原始来源：
-- [第六章：LLM Wiki vs RAG 深度对比](raw/articles/Karpathy_LLM_Wiki.md#六llm-wiki-vs-rag-深度对比)
-- [第七章：规模化缺陷与解决方案](raw/articles/Karpathy_LLM_Wiki.md#七规模化缺陷与解决方案)
-
----
-
-## 随仓库附带的示例内容
-
-这个 boilerplate 用 LLM Wiki 方法论本身作为示例数据（第一性原理：用这套方案来理解这套方案）。
-
-**一份来源，完整跑通一次 Ingest 的效果**：
-
-| 文件 | 类型 | 内容 |
-|------|------|------|
-| `raw/articles/Karpathy_LLM_Wiki.md` | 原始来源 | LLM Wiki 核心概念介绍（Karpathy 原文） |
-| `wiki/sources/summary-karpathy-llm-wiki.md` | 摘要页 | 上面那篇的 ingest 结果 |
-| `wiki/concepts/llm-wiki-paradigm.md` | 概念页 | LLM Wiki 范式：编译时知识积累、三层架构、三大操作 |
-| `wiki/concepts/rag-vs-llm-wiki.md` | 概念页 | RAG 与 LLM Wiki 的架构差异与混合方案 |
-| `wiki/concepts/knowledge-compaction.md` | 概念页 | 知识压缩：应对 Wiki 增长悖论的核心机制 |
-| `wiki/entities/andrej-karpathy.md` | 实体页 | 方法论提出者 |
+For detailed analysis of scaling bottlenecks (deep comparison with RAG, three major limitations and solutions), see the original source:
+- [Chapter 6: LLM Wiki vs RAG Deep Comparison](raw/articles/Karpathy_LLM_Wiki.md#六llm-wiki-vs-rag-深度对比)
+- [Chapter 7: Scaling Limitations and Solutions](raw/articles/Karpathy_LLM_Wiki.md#七规模化缺陷与解决方案)
 
 ---
 
-## 进一步阅读
+## Bundled Example Content
 
-- [CLAUDE.md](CLAUDE.md) — 完整 Schema 和工作流规范
-- [wiki/index.md](wiki/index.md) — Wiki 主目录
-- [wiki/concepts/llm-wiki-paradigm.md](wiki/concepts/llm-wiki-paradigm.md) — LLM Wiki 方法论详解
-- [Karpathy 原始 Gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)
+This boilerplate uses the LLM Wiki methodology itself as example data (first principles: use this approach to understand this approach).
+
+**One source, a complete Ingest run-through**:
+
+| File | Type | Content |
+|------|------|---------|
+| `raw/articles/Karpathy_LLM_Wiki.md` | Raw Source | Introduction to LLM Wiki core concepts (Karpathy's original) |
+| `wiki/sources/summary-karpathy-llm-wiki.md` | Summary Page | Ingest result of the above article |
+| `wiki/concepts/llm-wiki-paradigm.md` | Concept Page | LLM Wiki paradigm: compile-time knowledge accumulation, three-layer architecture, three operations |
+| `wiki/concepts/rag-vs-llm-wiki.md` | Concept Page | Architectural differences between RAG and LLM Wiki, and hybrid approaches |
+| `wiki/concepts/knowledge-compaction.md` | Concept Page | Knowledge compaction: the core mechanism for handling the Wiki growth paradox |
+| `wiki/entities/andrej-karpathy.md` | Entity Page | Methodology creator |
 
 ---
 
-## 致谢
+## Further Reading
 
-方案由 [Andrej Karpathy](https://karpathy.ai/) 提出，灵感来源于 Vannevar Bush 1945 年的 Memex 构想。
+- [CLAUDE.md](CLAUDE.md) — Complete Schema and workflow specification
+- [wiki/index.md](wiki/index.md) — Wiki main directory
+- [wiki/concepts/llm-wiki-paradigm.md](wiki/concepts/llm-wiki-paradigm.md) — Detailed LLM Wiki methodology
+- [Karpathy's Original Gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)
+
+---
+
+## Acknowledgments
+
+The approach was proposed by [Andrej Karpathy](https://karpathy.ai/), inspired by Vannevar Bush's 1945 Memex concept.

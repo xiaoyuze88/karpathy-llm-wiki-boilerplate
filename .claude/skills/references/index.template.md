@@ -1,31 +1,31 @@
 # Wiki Index
 
-这是 Wiki 的主目录，查询从这里开始。
+This is the main directory of the Wiki. Start your queries here.
 
-**最后更新**：[[wiki/log.md]]
+**Last updated**: [[wiki/log.md]]
 
 ---
 
 ## Sources (0)
 
-*暂无来源摘要页。执行首次 Ingest 后自动生成。*
+*No source summary pages yet. Will be auto-generated after the first Ingest.*
 
 ## Concepts (0)
 
-*暂无概念页。*
+*No concept pages yet.*
 
 ## Entities (0)
 
-*暂无实体页。*
+*No entity pages yet.*
 
 ## Comparisons (0)
 
-*暂无对比页。*
+*No comparison pages yet.*
 
 ## Syntheses (0)
 
-*暂无综合页。*
+*No synthesis pages yet.*
 
 ---
 
-*下一步：将你感兴趣的文章/论文放入 raw/，然后说「Ingest raw/...」*
+*Next step: Put your articles/papers of interest into raw/, then say "Ingest raw/..."*

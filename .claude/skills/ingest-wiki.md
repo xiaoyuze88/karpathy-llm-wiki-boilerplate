@@ -1,113 +1,113 @@
 ---
 name: ingest-wiki
-description: 当用户说 "Ingest raw/..."、"摄入"、"处理这篇文章"、"把这个加入知识库"、"存到知识库"、"记录到知识库"、"加到知识库"、"存进知识库"、"放入知识库"、"更新知识库"、"帮我存一下"、"ingest" 等，或直接把文件/文本内容发给模型并提到知识库时，使用此 skill。包含：原始文件归档到 raw/、摘要提取、概念/实体/comparisons 页更新、index/log/VAULT-INDEX 维护、Git 提交全流程。
+description: Use this skill when the user says "Ingest raw/...", "add to the wiki", "save to the knowledge base", "store in the wiki", "put this in the wiki", "process this article", "ingest", or when the user sends file/text content and mentions the wiki. Covers the full pipeline: archiving raw files, extracting summaries, updating concepts/entities/comparisons pages, maintaining index/log/VAULT-INDEX, and Git commit.
 ---
 
 # ingest-wiki
 
-将来源内容读取并整合进 Wiki 知识库。支持两种触发方式：
-- **方式 A**：用户已将文件放入 `raw/`，直接指定路径（如 `Ingest raw/articles/foo.md`）
-- **方式 B**：用户直接发来文件或文本内容，由模型先归档到 `raw/`，再执行后续流程
+Read source content and integrate it into the Wiki knowledge base. Supports two trigger modes:
+- **Mode A**: User has already placed the file in `raw/` and provides the path directly (e.g. `Ingest raw/articles/foo.md`)
+- **Mode B**: User sends file or text content directly; the LLM archives it to `raw/` first, then continues
 
-## 执行步骤
+## Steps
 
-1. **确定源文件路径**
+1. **Determine source file path**
 
-   **方式 A（用户指定路径）**：直接使用用户提供的 `raw/` 路径，跳到步骤 2。
+   **Mode A (user-specified path)**: Use the provided `raw/` path directly and proceed to step 2.
 
-   **方式 B（用户直接发来内容）**：
-   - 根据内容类型自动判断归档子目录：
-     - 文章/博客/网页 → `raw/articles/`
-     - 学术论文 → `raw/papers/`
-     - 仓库 README / 技术文档 → `raw/repos/`
-     - 会议/播客转录 → `raw/transcripts/`
-     - 数据文件 → `raw/data/`
-   - 文件名直接复用用户发来的原始文件名（如 `foo.md`）
-   - 若目标路径已存在同名文件，**暂停并询问用户**：
+   **Mode B (user sends content directly)**:
+   - Auto-detect the appropriate subdirectory based on content type:
+     - Articles / blog posts / web pages → `raw/articles/`
+     - Academic papers → `raw/papers/`
+     - Repository READMEs / technical docs → `raw/repos/`
+     - Meeting / podcast transcripts → `raw/transcripts/`
+     - Data files → `raw/data/`
+   - Reuse the original filename as provided by the user (e.g. `foo.md`)
+   - If a file with the same name already exists at the target path, **pause and ask the user**:
      ```
-     raw/{子目录}/{文件名} 已存在，请选择：
-     1. 覆盖原有文件
-     2. 新增为 {文件名-2}.md（数字后缀递增）
+     raw/{subdir}/{filename} already exists. Choose:
+     1. Overwrite the existing file
+     2. Save as {filename-2}.md (increment suffix)
      ```
-   - 按用户选择写入文件后继续
-   - 先读 `wiki/index.md` 获取现有 Wiki 全局视图，再读 `wiki/hot.md` 了解当前焦点
+   - Write the file per the user's choice, then continue
+   - Read `wiki/index.md` to get the current global Wiki view, then read `wiki/hot.md` for current focus
 
-2. **分析内容，提取 3-5 个关键要点**
-   - 核心论点是什么？
-   - 涉及哪些概念（需要创建/更新 `wiki/concepts/` 页面）？
-   - 涉及哪些实体（人物/公司/产品，需要创建/更新 `wiki/entities/` 页面）？
-   - 与已有 Wiki 内容有哪些关联或矛盾？
-   - 与 `wiki/hot.md` 中的当前焦点是否相关？
-   - **comparisons 判断**：新来源是否与已有某个概念/工具存在 **≥3 个可对比维度**的竞争或替代关系（如两种框架、两种方法论）？若是，在步骤 5a 创建 `wiki/comparisons/` 页面而非将对比内容塞入 concepts。
+2. **Analyze content, extract 3–5 key points**
+   - What is the core argument?
+   - Which concepts are involved (need to create/update `wiki/concepts/` pages)?
+   - Which entities are involved (people/companies/products — need to create/update `wiki/entities/` pages)?
+   - What connections or contradictions exist with existing Wiki content?
+   - Is this relevant to the current focus in `wiki/hot.md`?
+   - **Comparisons check**: Does the new source have **≥3 comparable dimensions** of competition or substitution with an existing concept/tool (e.g. two frameworks, two methodologies)? If yes, create a `wiki/comparisons/` page in step 5a instead of cramming comparison content into concepts.
 
-3. **创建 `wiki/sources/summary-{slug}.md`**
+3. **Create `wiki/sources/summary-{slug}.md`**
    ```yaml
    ---
-   title: "{原文标题}"
-   created: {今日日期}
-   modified: {今日日期}
-   tags: [#source, #{主题标签}]
+   title: "{Original title}"
+   created: {today's date}
+   modified: {today's date}
+   tags: [#source, #{topic tag}]
    related: []
-   summary: "{一句话摘要}"
+   summary: "{One-sentence summary}"
    source_path: "raw/..."
    ---
    ```
-   内容包含：摘要、关键要点列表、重要引用、与已有 Wiki 的关联/矛盾说明
+   Content includes: summary, list of key points, notable quotes, connections/contradictions with existing Wiki
 
-4. **更新 `wiki/index.md`**
-   - Sources 节增加条目，更新计数
-   - 如有新概念，在 Concepts 节增加条目，更新计数
-   - 如有新实体，在 Entities 节增加条目，更新计数
-   - 如有新比较页，在 Comparisons 节增加条目，更新计数
+4. **Update `wiki/index.md`**
+   - Add entry to Sources section, update count
+   - If new concepts exist, add entries to Concepts section, update count
+   - If new entities exist, add entries to Entities section, update count
+   - If new comparison pages exist, add entries to Comparisons section, update count
 
-5. **更新相关概念页（`wiki/concepts/*.md`）**
-   - 不存在则创建（含完整 frontmatter）
-   - 已存在则在末尾追加新来源的视角，更新 `modified` 日期
+5. **Update relevant concept pages (`wiki/concepts/*.md`)**
+   - Create if absent (with full frontmatter)
+   - Append the new source's perspective at the end if it exists, update `modified` date
 
-5a. **创建比较页（如步骤 2 判断需要，`wiki/comparisons/*.md`）**
-   - 文件命名：`{slug-a}-vs-{slug-b}.md`
-   - 内容结构：对比维度表格 + 各维度详述 + 适用场景 + 结论建议
-   - frontmatter tags 加 `#comparison`
-   - 同时在对应的 concepts 页末尾添加指向此比较页的链接
+5a. **Create comparison page (if step 2 determined one is needed, `wiki/comparisons/*.md`)**
+   - File naming: `{slug-a}-vs-{slug-b}.md`
+   - Content structure: comparison dimensions table + per-dimension detail + use cases + recommendation
+   - frontmatter tags include `#comparison`
+   - Also add a link to this comparison page at the bottom of the relevant concepts pages
 
-6. **更新相关实体页（`wiki/entities/*.md`）**
-   - 同步骤 5
+6. **Update relevant entity pages (`wiki/entities/*.md`)**
+   - Same as step 5
 
-7. **标记矛盾（如有）**
-   - 在摘要页和相关概念/实体页中用 `> ⚠️ 矛盾：...` 标注
+7. **Flag contradictions (if any)**
+   - Annotate with `> ⚠️ Contradiction: ...` in the summary page and in related concept/entity pages
 
-8. **追加到 `wiki/log.md`**
+8. **Append to `wiki/log.md`**
    ```
-   ## [{日期}] ingest | {文件名}
-   - 创建: wiki/sources/summary-{slug}.md
-   - 更新: wiki/index.md
-   - 新增概念: {列表，无则写"无"}
-   - 更新概念: {列表，无则写"无"}
-   - 新增实体: {列表，无则写"无"}
-   - 更新实体: {列表，无则写"无"}
-   - 新增比较页: {列表，无则写"无"}
-   - 矛盾: {描述，无则写"无"}
+   ## [{date}] ingest | {filename}
+   - Created: wiki/sources/summary-{slug}.md
+   - Updated: wiki/index.md
+   - New concepts: {list, or "none"}
+   - Updated concepts: {list, or "none"}
+   - New entities: {list, or "none"}
+   - Updated entities: {list, or "none"}
+   - New comparison pages: {list, or "none"}
+   - Contradictions: {description, or "none"}
    ```
 
-9. **更新 `VAULT-INDEX.md`**
-   - Sources 统计 +1
-   - 最近活动列表追加本次 ingest 记录
+9. **Update `VAULT-INDEX.md`**
+   - Increment Sources count by 1
+   - Append this ingest to the recent activity list
 
-10. **更新 `wiki/hot.md`**
-    - 在"最近活动"区块追加本次摘要：
+10. **Update `wiki/hot.md`**
+    - Append to the "Recent Activity" block:
       ```
-      - {日期} ingest | {来源文件名}：{1-2句关键要点}，新增页面：{列表}
+      - {date} ingest | {source filename}: {1–2 sentence key points}, new pages: {list}
       ```
-    - 如 hot.md 超过 500 字，压缩最早的活动记录（保留结构，删减细节）
+    - If hot.md exceeds 500 words, compress the oldest activity records (preserve structure, trim detail)
 
-11. **Git 同步**
+11. **Git sync**
     ```bash
     cd ~/knowledge-vault
     git add .
-    git commit -m "ingest: {文件名}"
+    git commit -m "ingest: {filename}"
     git push
     ```
 
-## 完成后输出
+## Output
 
-汇报：创建/更新了哪些文件、发现的 3-5 个关键要点、是否有矛盾、Git push 是否成功。
+Report: which files were created/updated, the 3–5 key points discovered, whether any contradictions were found, whether Git push succeeded.

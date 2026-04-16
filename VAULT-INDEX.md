@@ -1,13 +1,13 @@
-# VAULT-INDEX — 实时仪表板
+# VAULT-INDEX — Live Dashboard
 
-> 本文件由 LLM 自动维护，每次 ingest / lint 后更新。
+> This file is auto-maintained by the LLM and updated after every ingest / lint.
 
 ---
 
-## 📊 统计概览
+## 📊 Stats
 
-| 指标 | 数量 |
-|------|------|
+| Metric | Count |
+|--------|-------|
 | Sources | 1 |
 | Concepts | 3 |
 | Entities | 1 |
@@ -16,46 +16,46 @@
 
 ---
 
-## 🔄 最近活动
+## 🔄 Recent Activity
 
-| 日期 | 操作 | 内容 |
-|------|------|------|
-| 2026-04-16 | lint | 健康检查：1 结构问题、1 孤立页 已修；0 矛盾、0 过时声明 |
-| 2026-04-16 | ingest | Karpathy LLM Wiki（Karpathy_LLM_Wiki.md） |
-| 2026-04-14 | init | boilerplate 初始化 |
+| Date | Operation | Details |
+|------|-----------|---------|
+| 2026-04-16 | lint | Health check: 1 structural issue, 1 orphan page fixed; 0 contradictions, 0 outdated statements |
+| 2026-04-16 | ingest | Karpathy LLM Wiki (Karpathy_LLM_Wiki.md) |
+| 2026-04-14 | init | Boilerplate initialized |
 
 ---
 
-## 📁 目录结构
+## 📁 Directory Structure
 
 ```
 ~/knowledge-vault/
 ├── CLAUDE.md
 ├── VAULT-INDEX.md
 ├── raw/
-│   └── articles/         # 1 个文件
+│   └── articles/         # 1 file
 └── wiki/
     ├── index.md
     ├── log.md
     ├── hot.md
-    ├── sources/           # 1 个摘要页
-    ├── concepts/          # 3 个概念页
-    ├── entities/          # 1 个实体页
+    ├── sources/           # 1 summary page
+    ├── concepts/          # 3 concept pages
+    ├── entities/          # 1 entity page
     ├── comparisons/
     └── syntheses/
 ```
 
 ---
 
-## 🌡️ 当前焦点
+## 🌡️ Current Focus
 
-LLM Wiki 范式 — 编译时知识积累 vs RAG 查询时推导；规模临界点（100-200 篇）；三大规模化缺陷
+LLM Wiki paradigm — compile-time knowledge accumulation vs RAG query-time derivation; scale threshold (100–200 sources); three scale failure modes
 
-## ❓ 开放问题
+## ❓ Open Questions
 
-- 本知识库规模扩展时，何时引入 obsidian-wikilink-types 语义链接？
-- 知识压缩（Compaction）的具体触发条件和操作规程？
+- When to introduce obsidian-wikilink-types semantic links as the knowledge base grows?
+- Specific trigger conditions and procedures for Knowledge Compaction?
 
 ---
 
-*本文件由 AI 自动更新，每次 ingest/lint 后自动刷新统计信息*
+*This file is auto-updated by the LLM after every ingest/lint*

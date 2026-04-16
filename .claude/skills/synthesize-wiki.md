@@ -1,102 +1,102 @@
 ---
 name: synthesize-wiki
-description: 当用户说"综合一下"、"帮我写一篇关于 X 的报告"、"Synthesize"、"synthesis"、"把 wiki 里关于 X 的内容整合一下"、"生成综合报告"时使用此 skill。主动跨多个 wiki 页面综合指定主题，生成结构化报告并直接写入 wiki/syntheses/，无需等用户二次确认归档。
+description: Use this skill when the user says "synthesize", "write a report on X", "synthesis", "pull together everything in the wiki about X", or "create a synthesis report on X". Proactively synthesizes a specified topic across multiple wiki pages, generates a structured report, and writes it directly to wiki/syntheses/ — no second confirmation needed.
 ---
 
 # synthesize-wiki
 
-主动跨多页综合 Wiki 知识，生成结构化报告，直接写入 `wiki/syntheses/`。
+Proactively synthesize Wiki knowledge across multiple pages, generate a structured report, and write it directly to `wiki/syntheses/`.
 
-> 与 query-wiki 的区别：query 是"先回答、再被动归档"；synthesize 是"先明确产出目标、直接写入"。
+> Difference from query-wiki: query is "answer first, then passively archive"; synthesize is "define the output target first, then write directly".
 
-## 执行步骤
+## Steps
 
-1. **确认综合主题**
-   - 如用户指令模糊（如"综合一下"），询问："请确认综合主题和期望深度（概述 / 深度分析 / 对比报告）？"
-   - 主题明确则直接进入步骤 2
+1. **Confirm synthesis topic**
+   - If the instruction is vague (e.g. "synthesize things"), ask: "Please confirm the synthesis topic and desired depth (overview / deep analysis / comparison report)?"
+   - If the topic is clear, proceed to step 2
 
-2. **扫描相关 Wiki 页面**
-   - 读取 `wiki/index.md` 获取全局视图
-   - 读取 `wiki/hot.md` 了解当前焦点
-   - 按主题相关性读取：`wiki/sources/`、`wiki/concepts/`、`wiki/entities/`、`wiki/comparisons/`、`wiki/syntheses/`（已有综合避免重复）
+2. **Scan relevant Wiki pages**
+   - Read `wiki/index.md` for global view
+   - Read `wiki/hot.md` for current focus
+   - Read by relevance: `wiki/sources/`, `wiki/concepts/`, `wiki/entities/`, `wiki/comparisons/`, `wiki/syntheses/` (avoid duplicating existing syntheses)
 
-3. **识别来源覆盖情况**
-   - 标注哪些观点来自 **≥2 个来源**（较高可信度）
-   - 标注哪些观点仅来自 **1 个来源**（需注明）
-   - 标注 Wiki 中存在的**空白或未解决的开放问题**
+3. **Identify source coverage**
+   - Flag points supported by **≥2 sources** (higher confidence)
+   - Flag points from **only 1 source** (note accordingly)
+   - Flag **gaps or unresolved open questions** in the Wiki
 
-4. **生成综合报告**
+4. **Generate synthesis report**
 
-   报告结构（根据主题灵活调整）：
+   Report structure (adjust flexibly based on topic):
    ```
-   ## 核心结论（2-3 句）
+   ## Core Conclusions (2–3 sentences)
 
-   ## 主要发现
-   ### {子主题 1}
-   ### {子主题 2}
+   ## Key Findings
+   ### {Sub-topic 1}
+   ### {Sub-topic 2}
    ...
 
-   ## 跨来源共识
-   - {观点}（来源：[[页面A]]、[[页面B]]）
+   ## Cross-Source Consensus
+   - {point} (sources: [[page A]], [[page B]])
 
-   ## 单来源观点（待补充验证）
-   - {观点}（来源：[[页面C]]）
+   ## Single-Source Points (pending verification)
+   - {point} (source: [[page C]])
 
-   ## 开放问题 / Wiki 空白
-   - {问题描述} → 建议补充来源方向
+   ## Open Questions / Wiki Gaps
+   - {description} → suggested sources to add
 
-   ## 引用页面
+   ## Referenced Pages
    - [[wiki/sources/...]]
    - [[wiki/concepts/...]]
    ```
 
-5. **写入 `wiki/syntheses/{slug}-{YYYY-MM-DD}.md`**
+5. **Write to `wiki/syntheses/{slug}-{YYYY-MM-DD}.md`**
 
-   frontmatter 模板：
+   Frontmatter template:
    ```yaml
    ---
-   title: "{综合主题}"
-   created: {今日日期}
-   modified: {今日日期}
-   tags: [#synthesis, #{主题标签}]
-   related: [{所有引用的 wiki 页面}]
-   summary: "{一句话摘要}"
-   sources_count: {引用来源数量}
+   title: "{synthesis topic}"
+   created: {today's date}
+   modified: {today's date}
+   tags: [#synthesis, #{topic tag}]
+   related: [{all referenced wiki pages}]
+   summary: "{one-sentence summary}"
+   sources_count: {number of referenced sources}
    ---
    ```
 
-6. **更新 `wiki/index.md`**
-   - Syntheses 节增加条目，更新计数
+6. **Update `wiki/index.md`**
+   - Add entry to Syntheses section, update count
 
-7. **在引用页面中添加反向链接**
-   - 在每个被引用的 wiki 页面末尾追加：`- [[wiki/syntheses/{slug}-{date}.md]]（综合报告）`
+7. **Add reverse links in referenced pages**
+   - Append to the bottom of each referenced wiki page: `- [[wiki/syntheses/{slug}-{date}.md]] (synthesis)`
 
-8. **追加到 `wiki/log.md`**
+8. **Append to `wiki/log.md`**
    ```
-   ## [{日期}] synthesize | {主题}
-   - 保存为: wiki/syntheses/{slug}-{date}.md
-   - 引用来源: {页面列表}
-   - 识别空白: {开放问题列表，无则写"无"}
+   ## [{date}] synthesize | {topic}
+   - Saved as: wiki/syntheses/{slug}-{date}.md
+   - Referenced sources: {page list}
+   - Identified gaps: {open question list, or "none"}
    ```
 
-9. **更新 `VAULT-INDEX.md`**
-   - Syntheses 统计 +1
-   - 最近活动追加本次记录
+9. **Update `VAULT-INDEX.md`**
+   - Increment Syntheses count by 1
+   - Append to recent activity
 
-10. **更新 `wiki/hot.md`**
-    - 最近活动追加：
+10. **Update `wiki/hot.md`**
+    - Append to recent activity:
       ```
-      - {日期} synthesize | {主题}（引用 {n} 个页面，识别 {m} 个空白）
+      - {date} synthesize | {topic} (referenced {n} pages, identified {m} gaps)
       ```
 
-11. **Git 同步**
+11. **Git sync**
     ```bash
     cd ~/knowledge-vault
     git add .
-    git commit -m "synthesize: {主题}"
+    git commit -m "synthesize: {topic}"
     git push
     ```
 
-## 完成后输出
+## Output
 
-在对话中展示综合报告全文，并汇报：写入路径、引用来源数、识别的开放问题数、Git push 状态。
+Display the full synthesis report in the conversation, and report: write path, number of referenced sources, number of identified open questions, Git push status.
