@@ -1,6 +1,6 @@
 # karpathy-llm-wiki-boilerplate
 
-> 基于 [Andrej Karpathy LLM Wiki 方案](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) 的个人知识库脚手架。
+>基于 [Andrej Karpathy LLM Wiki 方案](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) 的轻量级实现——去掉一切工程依赖，用最少的文件还原其核心工作流。
 > Clone 下来，简单配置，即可拥有一个由 LLM 持续维护的个人 Wiki。
 
 ---

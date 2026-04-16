@@ -1,7 +1,9 @@
 # karpathy-llm-wiki-boilerplate
 
-> A personal knowledge vault boilerplate based on [Andrej Karpathy's LLM Wiki approach](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f).
+> A lightweight implementation of [Andrej Karpathy's LLM Wiki approach](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) — no engineering dependencies, just the minimal files needed to reproduce the core workflow.
 > Clone it, configure it, and you'll have a personal Wiki continuously maintained by an LLM.
+
+📖 [中文版 README](README_zh.md)
 
 ---
 
